@@ -4,6 +4,12 @@
 
 This project is a backend API for managing tasks with CRUD operations. It is built using Flask and MySQL, and it is containerized using Docker and Docker Compose. The API includes user authentication using JWT (JSON Web Tokens) to secure task management operations.
 
+## Video Guide
+
+For a visual walkthrough of the setup and usage of the Task Management API, you can watch the following video:
+
+[Setup and Walkthrough Video](https://www.loom.com/share/45cf61acf86f4561886156f008e16c7e?sid=8d706950-f8cf-471f-9710-237a7dc0d6b0)
+
 ## Table of Contents
 
 - [Prerequisites](#prerequisites)
@@ -62,7 +68,7 @@ Make sure all the above tools are installed and accessible from your command lin
 1. **Clone the Repository**:
    Go to the location where you would like this code folder to be and run the code below:
    ```bash
-   git clone https://github.com/yourusername/Task-Management-API.git
+   git clone https://github.com/<yourusername>/Task-Management-API.git
    cd Task-Management-API
    ```
 
