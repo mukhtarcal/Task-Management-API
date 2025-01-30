@@ -2,15 +2,16 @@
 
 ## Overview
 
-This project is a backend API for managing tasks with CRUD operations. It is built using Flask and MySQL, and it is containerized using Docker and Docker Compose.
+This project is a backend API for managing tasks with CRUD operations. It is built using Flask and MySQL, and it is containerized using Docker and Docker Compose. The API includes user authentication using JWT (JSON Web Tokens) to secure task management operations.
 
 ## Table of Contents
 
 - [Prerequisites](#prerequisites)
 - [Setup Instructions](#setup-instructions)
 - [Running the API](#running-the-api)
-- [Testing the API](#testing-the-api)
+- [User Authentication](#user-authentication)
 - [API Endpoints](#api-endpoints)
+- [Testing the API](#testing-the-api)
 
 ## Prerequisites
 
@@ -59,7 +60,7 @@ Make sure all the above tools are installed and accessible from your command lin
 ## Setup Instructions
 
 1. **Clone the Repository**:
-    Go to location where you would like this code folder to be and run the code below:
+   Go to the location where you would like this code folder to be and run the code below:
    ```bash
    git clone https://github.com/yourusername/Task-Management-API.git
    cd Task-Management-API
@@ -71,6 +72,7 @@ Make sure all the above tools are installed and accessible from your command lin
    DB_USER=task_user
    DB_PASSWORD=task_password
    DB_NAME=task_db
+   DB_HOST=db
    ```
 
 3. **Build and Start the Containers**:
@@ -102,69 +104,101 @@ To stop the containers, press `CTRL+C` in the terminal where the containers are 
 docker-compose down
 ```
 
+## User Authentication
+
+### Register a New User (You can see clearly how to do later using cURL or Postman)
+
+To register a new user, send a POST request to the `/auth/register` endpoint with the following JSON body:
+
+```json
+{
+  "username": "your_username",
+  "password": "your_password"
+}
+```
+
+### Login
+
+To log in, send a POST request to the `/auth/login` endpoint with the following JSON body (You can see clearly how to do later using cURL or Postman):
+
+```json
+{
+  "username": "your_username",
+  "password": "your_password"
+}
+```
+
+On successful login, you will receive a JWT token in the response. Use this token for subsequent requests to protected endpoints.
+
+### Using the JWT Token (tokens expire after 1 hour - re-login to attain new token)
+
+Include the JWT token in the `Authorization` header for requests to protected endpoints (e.g., task management endpoints):
+
+```
+Authorization: Bearer <your_jwt_token>
+```
+
+## API Endpoints
+
+- `POST /auth/register`: Register a new user.
+- `POST /auth/login`: Log in and receive a JWT token.
+- `GET /tasks`: Retrieve all tasks (requires authentication).
+- `POST /tasks`: Create a new task (requires authentication).
+- `GET /tasks/{id}`: Retrieve a task by ID (requires authentication).
+- `PUT /tasks/{id}`: Update a task by ID (requires authentication).
+- `DELETE /tasks/{id}`: Delete a task by ID (requires authentication).
+
 ## Testing the API
 
-You can test the API using tools like Postman, cURL, or your web browser. Below are examples of how to test the API endpoints. 
+You can test the API using tools like Postman, cURL, or your web browser. Below are examples of how to test the API endpoints. Make sure the backend is running first.
 
-### Using cURL (Easiest)
+### Using cURL (recommended)
 
-1. **Get All Tasks**:
+1. **Register a New User**:
    ```bash
-   curl -X GET http://localhost:5001/tasks
+   curl -X POST http://localhost:5001/auth/register -H "Content-Type: application/json" -d '{"username": "testuser", "password": "testpass"}'
    ```
 
-2. **Create a New Task**:
+2. **Login**:
    ```bash
-   curl -X POST http://localhost:5001/tasks -H "Content-Type: application/json" -d '{"title": "Test Task", "description": "This is a test task", "dueDate": "2023-12-31T00:00:00", "status": "pending"}'
+   curl -X POST http://localhost:5001/auth/login -H "Content-Type: application/json" -d '{"username": "testuser", "password": "testpass"}'
    ```
 
-3. **Get a Task by ID**:
-   Replace `<task_id>` with the actual ID of the task you created.
+   Example token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJmcmVzaCI6ZmFsc2UsImlhdCI6MTczODIxODMxNiwianRpIjoiZDA4OWEwMDMtZjVmOC00ODhkLTkwZDAtMTBiOTBjNjc4N2YwIiwidHlwZSI6ImFjY2VzcyIsInN1YiI6IjA5ZjdlMjI0LWM3NzctNDBkNy1iNjkyLTkyNzM2ZmVkMjdmNSIsIm5iZiI6MTczODIxODMxNiwiZXhwIjoxNzY5NzU0MzE2fQ.oNUkFVPwhcVgSFVJwqx4ELRXBwPNV9-86diHKq4g8OY"
+
+3. **Get All Tasks** (after obtaining the JWT token):
    ```bash
-   curl -X GET http://localhost:5001/tasks/<task_id>
+   curl -X GET http://localhost:5001/tasks -H "Authorization: Bearer <your_jwt_token>"
    ```
 
-4. **Update a Task**:
-   Replace `<task_id>` with the actual ID of the task you want to update.
+4. **Create a New Task** (after obtaining the JWT token):
    ```bash
-   curl -X PUT http://localhost:5001/tasks/<task_id> -H "Content-Type: application/json" -d '{"title": "Updated Task", "description": "Updated description", "dueDate": "2023-12-31T00:00:00", "status": "in-progress"}'
+   curl -X POST http://localhost:5001/tasks -H "Content-Type: application/json" -H "Authorization: Bearer <your_jwt_token>" -d '{"title": "Test Task", "description": "This is a test task", "dueDate": "2023-12-31T00:00:00", "status": "pending"}'
    ```
 
-5. **Delete a Task**:
-   Replace `<task_id>` with the actual ID of the task you want to delete.
+5. **Update a Task** (after obtaining the JWT token):
    ```bash
-   curl -X DELETE http://localhost:5001/tasks/<task_id>
+   curl -X PUT http://localhost:5001/tasks/<task_id> -H "Content-Type: application/json" -H "Authorization: Bearer <your_jwt_token>" -d '{"title": "Updated Task", "status": "completed"}'
+   ```
+
+6. **Delete a Task** (after obtaining the JWT token):
+   ```bash
+   curl -X DELETE http://localhost:5001/tasks/<task_id> -H "Authorization: Bearer <your_jwt_token>"
    ```
 
 ### Using Postman
 
-1. Open Postman and create a new request.
-2. Set the request type (GET, POST, PUT, DELETE) based on the operation you want to perform.
-3. Enter the URL (e.g., `http://localhost:5001/tasks`).
-4. For POST and PUT requests, go to the "Body" tab, select "raw", and set the type to "JSON". Enter the JSON data for the task.
-5. Click "Send" to execute the request and view the response.
+1. **Register a New User**: Set the request type to POST and enter the URL `http://localhost:5001/auth/register`. In the "Body" tab, select "raw" and set the type to "JSON". Enter the JSON data for the user.
 
+2. **Login**: Set the request type to POST and enter the URL `http://localhost:5001/auth/login`. In the "Body" tab, select "raw" and set the type to "JSON". Enter the JSON data for the user.
 
-### Using a Web Browser
+3. **Get All Tasks**: Set the request type to GET and enter the URL `http://localhost:5001/tasks`. In the "Headers" tab, add a new header with the key `Authorization` and the value `Bearer <your_jwt_token>`.
 
-You can test the GET endpoints directly in your web browser (Chrome, Firefox, Safari, etc.):
+4. **Create a New Task**: Set the request type to POST and enter the URL `http://localhost:5001/tasks`. In the "Body" tab, select "raw" and set the type to "JSON". Enter the JSON data for the task, and add the `Authorization` header as described above.
 
-View All Tasks:
+5. **Update a Task**: Set the request type to PUT and enter the URL `http://localhost:5001/tasks/<task_id>`. In the "Body" tab, select "raw" and set the type to "JSON". Enter the JSON data for the updated task, and add the `Authorization` header as described above.
 
-Open your web browser
-Navigate to: http://localhost:5001/tasks
-You should see a JSON response with all tasks, or an empty array [] if no tasks exist
-
-
-View Single Task:
-
-Navigate to: http://localhost:5001/tasks/<task_id>
-Replace <task_id> with an actual task ID
-You should see the JSON data for that specific task
-
-Note: Browser testing is limited to GET requests only. For POST, PUT, and DELETE operations, please use cURL or Postman as described above.
-
-
+6. **Delete a Task**: Set the request type to DELETE and enter the URL `http://localhost:5001/tasks/<task_id>`. In the "Headers" tab, add a new header with the key `Authorization` and the value `Bearer <your_jwt_token>`.
 
 ## API Endpoints
 
@@ -174,3 +208,6 @@ Note: Browser testing is limited to GET requests only. For POST, PUT, and DELETE
 - `PUT /tasks/{id}`: Update a task by ID.
 - `DELETE /tasks/{id}`: Delete a task by ID.
 
+## Conclusion
+
+This README provides a comprehensive guide to setting up and using the Task Management API. Follow the instructions carefully to ensure a smooth experience. If you encounter any issues, please refer to the documentation for troubleshooting tips or reach out for support.
