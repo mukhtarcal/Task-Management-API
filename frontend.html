@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Task Management UI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+        }
+        h2 {
+            color: #333;
+        }
+        form {
+            margin-bottom: 20px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px 0;
+            width: 100%;
+        }
+        .task-list {
+            margin-top: 20px;
+        }
+        .task-item {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Create Account</h2>
+    <form id="registerForm">
+        <input type="text" id="registerUsername" placeholder="Username" required>
+        <input type="password" id="registerPassword" placeholder="Password" required>
+        <button type="submit">Create Account</button>
+    </form>
+
+    <h2>Login</h2>
+    <form id="loginForm">
+        <input type="text" id="loginUsername" placeholder="Username" required>
+        <input type="password" id="loginPassword" placeholder="Password" required>
+        <button type="submit">Login</button>
+    </form>
+
+    <h2>Manage Tasks</h2>
+    <form id="taskForm">
+        <input type="text" id="taskTitle" placeholder="Task Title" required>
+        <input type="text" id="taskDescription" placeholder="Task Description" required>
+        <button type="submit">Create Task</button>
+    </form>
+
+    <div class="task-list" id="taskList"></div>
+</div>
+
+<script>
+    const apiUrl = 'http://localhost:5001'; // Update with your API URL
+    let token = '';
+
+    // Register Account
+    document.getElementById('registerForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('registerUsername').value;
+        const password = document.getElementById('registerPassword').value;
+
+        const response = await fetch(`${apiUrl}/auth/register`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+
+        const data = await response.json();
+        alert(data.message || 'Account created successfully!');
+    });
+
+    // Login Account
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const username = document.getElementById('loginUsername').value;
+        const password = document.getElementById('loginPassword').value;
+
+        const response = await fetch(`${apiUrl}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, password })
+        });
+
+        const data = await response.json();
+        if (data.token) {
+            token = data.token;
+            alert('Login successful!');
+            loadTasks(); // Load tasks after login
+        } else {
+            alert(data.error || 'Login failed!');
+        }
+    });
+
+    // Create Task
+    document.getElementById('taskForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const title = document.getElementById('taskTitle').value;
+        const description = document.getElementById('taskDescription').value;
+
+        const response = await fetch(`${apiUrl}/tasks`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ title, description })
+        });
+
+        const data = await response.json();
+        alert(data.message || 'Task created successfully!');
+        loadTasks(); // Reload tasks
+    });
+
+    // Load Tasks
+    async function loadTasks() {
+        const response = await fetch(`${apiUrl}/tasks`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const tasks = await response.json();
+        const taskList = document.getElementById('taskList');
+        taskList.innerHTML = ''; // Clear existing tasks
+
+        tasks.forEach(task => {
+            const taskItem = document.createElement('div');
+            taskItem.className = 'task-item';
+            taskItem.innerHTML = `
+                <h4>${task.title}</h4>
+                <p>${task.description}</p>
+                <button onclick="deleteTask('${task.id}')">Delete</button>
+            `;
+            taskList.appendChild(taskItem);
+        });
+    }
+
+    // Delete Task
+    async function deleteTask(taskId) {
+        const response = await fetch(`${apiUrl}/tasks/${taskId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const data = await response.json();
+        alert(data.message || 'Task deleted successfully!');
+        loadTasks(); // Reload tasks
+    }
+</script>
+
+</body>
+</html>

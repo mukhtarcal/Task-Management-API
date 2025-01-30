@@ -200,13 +200,6 @@ You can test the API using tools like Postman, cURL, or your web browser. Below 
 
 6. **Delete a Task**: Set the request type to DELETE and enter the URL `http://localhost:5001/tasks/<task_id>`. In the "Headers" tab, add a new header with the key `Authorization` and the value `Bearer <your_jwt_token>`.
 
-## API Endpoints
-
-- `GET /tasks`: Retrieve all tasks.
-- `POST /tasks`: Create a new task.
-- `GET /tasks/{id}`: Retrieve a task by ID.
-- `PUT /tasks/{id}`: Update a task by ID.
-- `DELETE /tasks/{id}`: Delete a task by ID.
 
 ## Conclusion
 

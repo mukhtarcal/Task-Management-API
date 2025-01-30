@@ -1,4 +1,5 @@
 from flask import Flask, jsonify, request
+from flask_cors import CORS
 from flask_jwt_extended import jwt_required, get_jwt_identity, JWTManager, create_access_token
 import mysql.connector
 from mysql.connector import Error
@@ -12,6 +13,8 @@ import bcrypt
 load_dotenv()
 
 app = Flask(__name__)
+
+CORS(app)
 
 # Initialize JWT Manager
 app.config['JWT_SECRET_KEY'] = 'your_jwt_secret_key'  # Change this to a random secret key
